@@ -34,7 +34,7 @@ func ConnectMongoDB() *mongo.Client {
 	return client
 }
 
-func GetCollection(name string, indexes bson.M) *mongo.Collection {
+func GetCollection(name string, indexes bson.D) *mongo.Collection {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	collection := MongoDB.Database(configs.GetMongoDatabase()).Collection(name)
 

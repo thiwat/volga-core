@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"context"
+	"time"
 	"volga-core/configs"
 
 	"github.com/redis/go-redis/v9"
@@ -18,10 +19,18 @@ func ConnectRedis() *redis.Client {
 	return rdb
 }
 
-func SetKey(key string, value string) error {
+func SetKey(key string, value string, ttl int) error {
 	ctx := context.Background()
 
-	err := RedisClient.Set(ctx, key, value, 0).Err()
+	err := RedisClient.Set(ctx, key, value, time.Duration(ttl)*time.Minute).Err()
 
 	return err
+}
+
+func GetKey(key string) (string, error) {
+	ctx := context.Background()
+
+	val, err := RedisClient.Get(ctx, key).Result()
+
+	return val, err
 }

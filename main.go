@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"volga-core/application"
 	"volga-core/configs"
 	"volga-core/user"
 
@@ -15,6 +16,7 @@ func main() {
 	v1 := api.Group("/v1")
 
 	user.RestRouteV1(v1)
+	application.RestRouteV1(v1)
 
 	log.Fatal(app.Listen(configs.GetPort()))
 }
