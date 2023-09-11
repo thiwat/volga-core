@@ -12,10 +12,12 @@ import (
 
 var userCollection *mongo.Collection = dbs.GetCollection(
 	configs.GetMongoUserCollectionName(),
-	bson.M{"username": 1},
+	bson.D{
+		{Key: "username", Value: 1},
+	},
 )
 
-func FindUserByUsername(username string) (User, error) {
+func FindByUsername(username string) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var user User
@@ -28,7 +30,7 @@ func FindUserByUsername(username string) (User, error) {
 	return user, nil
 }
 
-func CreateUser(user User) (User, error) {
+func Create(user User) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -38,6 +40,6 @@ func CreateUser(user User) (User, error) {
 		return user, err
 	}
 
-	user, _ = FindUserByUsername(user.Username)
+	user, _ = FindByUsername(user.Username)
 	return user, nil
 }

@@ -10,9 +10,10 @@ import (
 )
 
 var Issuer = "Volga - Password Management"
+var SESSION_TTL = 15
 
 func AuthLogin(username string) (AuthenResult, error) {
-	_, err := FindUserByUsername(username)
+	_, err := FindByUsername(username)
 
 	if err == nil {
 		return AuthenResult{Success: true}, nil
@@ -28,7 +29,7 @@ func AuthLogin(username string) (AuthenResult, error) {
 		SecretKey: key.Secret(),
 	}
 
-	user, err = CreateUser(user)
+	user, err = Create(user)
 
 	if err != nil {
 		return AuthenResult{Success: false}, err
@@ -42,7 +43,7 @@ func AuthLogin(username string) (AuthenResult, error) {
 func ValidateOtp(username string, otp string) (TokenResult, error) {
 	var result TokenResult
 
-	user, err := FindUserByUsername(username)
+	user, err := FindByUsername(username)
 
 	if err != nil {
 		return result, nil
@@ -60,7 +61,7 @@ func ValidateOtp(username string, otp string) (TokenResult, error) {
 
 	out, _ := json.Marshal(session)
 
-	dbs.SetKey(token, string(out))
+	dbs.SetKey(token, string(out), SESSION_TTL)
 
 	return result, nil
 }
