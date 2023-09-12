@@ -52,4 +52,19 @@ func RestRouteV1(router fiber.Router) {
 
 		return c.Status(http.StatusOK).JSON(res)
 	})
+
+	router.Patch("/token/validate", func(c *fiber.Ctx) error {
+		var input ValidateTokenInput
+
+		if err := c.BodyParser(&input); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
+				Code:    "invalid_request",
+				Message: err.Error(),
+			})
+		}
+
+		res := ValidateToken(input.Token)
+
+		return c.Status(http.StatusOK).JSON(res)
+	})
 }

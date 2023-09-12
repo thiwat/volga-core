@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"volga-core/dbs"
+	"volga-core/types"
 
 	"github.com/google/uuid"
 	"github.com/pquerna/otp/totp"
@@ -64,4 +65,19 @@ func ValidateOtp(username string, otp string) (TokenResult, error) {
 	dbs.SetKey(token, string(out), SESSION_TTL)
 
 	return result, nil
+}
+
+func ValidateToken(token string) ValidateTokenOutput {
+	result := ValidateTokenOutput{
+		Status: true,
+	}
+
+	var session types.Session
+	redisData, _ := dbs.GetKey(token)
+
+	if err := json.Unmarshal([]byte(redisData), &session); err != nil {
+		result.Status = false
+	}
+
+	return result
 }
