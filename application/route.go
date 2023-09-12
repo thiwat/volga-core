@@ -1,31 +1,18 @@
 package application
 
 import (
-	"encoding/json"
 	"net/http"
-	"strings"
-	"volga-core/dbs"
+	"volga-core/middlewares"
 	"volga-core/types"
 
 	fiber "github.com/gofiber/fiber/v2"
 )
 
 func RestRouteV1(router fiber.Router) {
-	router.Post("/application", func(c *fiber.Ctx) error {
-		token := strings.Replace(c.GetReqHeaders()["Authorization"], "Bearer ", "", 1)
-
-		var session types.Session
-
-		sessionData, _ := dbs.GetKey(token)
-
-		err := json.Unmarshal([]byte(sessionData), &session)
-
-		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
-				Code:    "invalid_request",
-				Message: "Access Denided",
-			})
-		}
+	application := router.Group("application")
+	application.Use(middlewares.ValidateToken())
+	application.Post("/", func(c *fiber.Ctx) error {
+		session := c.Locals("session").(types.Session)
 
 		var app Application
 		if err := c.BodyParser(&app); err != nil {
@@ -49,21 +36,8 @@ func RestRouteV1(router fiber.Router) {
 		return c.Status(http.StatusOK).JSON(res)
 	})
 
-	router.Put("/application/:code", func(c *fiber.Ctx) error {
-		token := strings.Replace(c.GetReqHeaders()["Authorization"], "Bearer ", "", 1)
-
-		var session types.Session
-
-		sessionData, _ := dbs.GetKey(token)
-
-		err := json.Unmarshal([]byte(sessionData), &session)
-
-		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
-				Code:    "invalid_request",
-				Message: "Access Denided",
-			})
-		}
+	application.Put("/:code", func(c *fiber.Ctx) error {
+		session := c.Locals("session").(types.Session)
 
 		code := c.Params("code")
 		var app Application
@@ -88,21 +62,8 @@ func RestRouteV1(router fiber.Router) {
 		return c.Status(http.StatusOK).JSON(res)
 	})
 
-	router.Get("/application", func(c *fiber.Ctx) error {
-		token := strings.Replace(c.GetReqHeaders()["Authorization"], "Bearer ", "", 1)
-
-		var session types.Session
-
-		sessionData, _ := dbs.GetKey(token)
-
-		err := json.Unmarshal([]byte(sessionData), &session)
-
-		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
-				Code:    "invalid_request",
-				Message: "Access Denided",
-			})
-		}
+	application.Get("/", func(c *fiber.Ctx) error {
+		session := c.Locals("session").(types.Session)
 
 		res, err := ListByUser(session.Username)
 
