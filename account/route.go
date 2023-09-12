@@ -1,4 +1,4 @@
-package application
+package account
 
 import (
 	"net/http"
@@ -9,20 +9,22 @@ import (
 )
 
 func RestRouteV1(router fiber.Router) {
-	application := router.Group("application")
-	application.Use(middlewares.ValidateToken())
-	application.Post("/", func(c *fiber.Ctx) error {
+	account := router.Group("account")
+
+	account.Use(middlewares.ValidateToken())
+
+	account.Post("/", func(c *fiber.Ctx) error {
 		session := c.Locals("session").(types.Session)
 
-		var app Application
-		if err := c.BodyParser(&app); err != nil {
+		var account Account
+		if err := c.BodyParser(&account); err != nil {
 			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
 				Code:    "invalid_request",
 				Message: err.Error(),
 			})
 		}
 
-		res, err := CreateApplication(app, session)
+		res, err := CreateAccount(account, session)
 
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
@@ -34,19 +36,11 @@ func RestRouteV1(router fiber.Router) {
 		return c.Status(http.StatusOK).JSON(res)
 	})
 
-	application.Put("/:code", func(c *fiber.Ctx) error {
+	account.Get("/:application", func(c *fiber.Ctx) error {
+		app := c.Params("application")
 		session := c.Locals("session").(types.Session)
 
-		code := c.Params("code")
-		var app Application
-		if err := c.BodyParser(&app); err != nil {
-			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
-				Code:    "invalid_request",
-				Message: err.Error(),
-			})
-		}
-
-		res, err := UpdateApplication(code, app, session)
+		res, err := ListAccount(app, session)
 
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
@@ -58,10 +52,20 @@ func RestRouteV1(router fiber.Router) {
 		return c.Status(http.StatusOK).JSON(res)
 	})
 
-	application.Get("/", func(c *fiber.Ctx) error {
+	account.Patch("/:application", func(c *fiber.Ctx) error {
 		session := c.Locals("session").(types.Session)
+		app := c.Params("application")
 
-		res, err := ListByUser(session.Username)
+		var input PasswordInput
+
+		if err := c.BodyParser(&input); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{
+				Code:    "invalid_request",
+				Message: err.Error(),
+			})
+		}
+
+		res, err := GetPassword(app, input.Username, session)
 
 		if err != nil {
 			return c.Status(http.StatusBadRequest).JSON(types.ErrorResponse{

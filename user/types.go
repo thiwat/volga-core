@@ -18,10 +18,6 @@ type TokenResult struct {
 	Token string `json:"token"`
 }
 
-type Session struct {
-	Username string `json:"username"`
-}
-
 type ValidateTokenInput struct {
 	Token string `json:"token"`
 }

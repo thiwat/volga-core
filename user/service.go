@@ -58,7 +58,7 @@ func ValidateOtp(username string, otp string) (TokenResult, error) {
 
 	token := uuid.New().String()
 	result.Token = token
-	session := Session{Username: username}
+	session := types.Session{Username: username, SecretKey: user.SecretKey}
 
 	out, _ := json.Marshal(session)
 

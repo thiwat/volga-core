@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var accountCollection *mongo.Collection = dbs.GetCollection(
@@ -50,4 +51,48 @@ func Create(account Account) (Account, error) {
 		"application": account.Application,
 		"user":        account.User,
 	})
+}
+
+func UpdateOne(filter bson.M, account Account) (Account, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	account.UpdatedAt = time.Now()
+
+	_, err := accountCollection.UpdateOne(
+		ctx,
+		filter,
+		account,
+	)
+
+	if err != nil {
+		return account, err
+	}
+
+	return FindOne(filter)
+}
+
+func List(filter bson.M) ([]Account, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var accounts = make([]Account, 0)
+
+	opts := options.Find()
+
+	cursor, err := accountCollection.Find(
+		ctx,
+		filter,
+		opts,
+	)
+
+	if err != nil {
+		return accounts, err
+	}
+
+	if err = cursor.All(ctx, &accounts); err != nil {
+		return accounts, err
+	}
+
+	return accounts, nil
 }
