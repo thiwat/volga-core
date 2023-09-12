@@ -1,5 +1,6 @@
 package types
 
 type Session struct {
-	Username string
+	Username  string
+	SecretKey string
 }
