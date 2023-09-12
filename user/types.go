@@ -21,3 +21,11 @@ type TokenResult struct {
 type Session struct {
 	Username string `json:"username"`
 }
+
+type ValidateTokenInput struct {
+	Token string `json:"token"`
+}
+
+type ValidateTokenOutput struct {
+	Status bool `json:"status"`
+}
